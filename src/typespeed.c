@@ -413,8 +413,11 @@ Typespeed comes with ABSOLUTELY NO WARRANTY; for details read COPYING.\n"),
 			if (netlogfile != NULL)
 				if (fclose(netlogfile))
 					xerr(1, "main: fclose netlogfile");
-			if ((netlogfile = fopen(optarg, "w")) == NULL)
-				xerr(1, "main: fopen netlogfile");
+			int fd = open(optarg, O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+			if (fd < 0 || (netlogfile = fdopen(fd, "w")) == NULL) {
+				if (fd >= 0) close(fd);
+				xerr(1, "main: open netlogfile");
+			}
 			break;
 		case 'o':
 			opt.net = H2H;
